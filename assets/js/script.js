@@ -47,48 +47,59 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+var auditTask = function(taskEl) {
+  // get date from task element
+  var date = $(taskEl).find("span").text().trim();
+  // convert to moment object at 5:00 pm
+  var time = moment(date, "L").set("hour", 17);
+  // remove any old clases from Element
+  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
+  // apply new class if task is near/over due date
+  if(moment().isAfter(time)) {
+    $(taskEl).addClass("list-group-item-danger");
+  } else if (Math.abs(moment().diff(time, "days")) <= 2) {
+    $(taskEl).addClass("list-group-item-warning");
+  }
+};
+
 // enable draggable/sortable feature on list-group elements
 $(".card .list-group").sortable({
+  // enable dragging across lists
   connectWith: $(".card .list-group"),
   scroll: false,
   tolerance: "pointer",
   helper: "clone",
-  activate: function(event) {
+  activate: function(event, ui) {
     $(this).addClass("dropover");
     $(".bottom-trash").addClass("bottom-trash-drag");
-    // console.log("activate", this);
   },
-  deactivate: function(event) {
-    $(this).remove(".dropover");
-    $(".bottom-trash").remove(".bottom-trash-drag");
+  deactivate: function(event, ui) {
+    $(this).removeClass("dropover");
+    $(".bottom-trash").removeClass("bottom-trash-drag");
   },
   over: function(event) {
     $(event.target).addClass("dropover-active");
-    // console.log("over", event.target);
   },
   out: function(event) {
-    $(event.target).remove(".dropover-active");
-    // console.log("out", event.target);
+    $(event.target).removeClass("dropover-active");
   },
-  update: function(event) {
+  update: function() {
   // array to store the task data in
   var tempArr = [];
   // loop over current set of children in sortable list
-  $(this).children().each(function() {
-    var text = $(this)
+  $(this)
+    .children()
+    .each(function() {
+      //save values in temp array
+    tempArr.push({
+      text: $(this)
       .find("p")
       .text()
-      .trim();
-
-    var date = $(this)
+      .trim(),
+    date: $(this)
     .find("span")
     .text()
-    .trim(); 
-
-  // add task data to the temp array as an object
-    tempArr.push({
-      text: text,
-      date: date
+    .trim()
     });
   });
 
@@ -107,20 +118,24 @@ $("#trash").droppable({
   accept: ".card .list-group-item",
   tolerance: "touch",
   drop: function(event, ui) {
-    console.log("drop");
+    // remove dragged element from the dom
     ui.draggable.remove();
-    $(".bottom-trash").remove(".bottom-trash-active");
+    $(".bottom-trash").removeClass("bottom-trash-active");
   },
   over: function(event, ui) {
-    $(".bottom-trash").addClass(".bottom-trash-active");
-    console.log("over");
+    console.log(ui);
+    $(".bottom-trash").addClass("bottom-trash-active");
   },
   out: function(event, ui) {
-    console.log("out");
-    $(".bottom-trash").remove(".bottom-trash-active");
+    $(".bottom-trash").removeClass("bottom-trash-active");
   }
 });
 
+// convert text field into a jquery date picker
+$("#modalDueDate").datepicker({
+  // force user to select a future date
+  minDate: 1
+});
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
@@ -132,10 +147,6 @@ $("#task-form-modal").on("show.bs.modal", function() {
 $("#task-form-modal").on("shown.bs.modal", function() {
   // highlight textarea
   $("#modalTaskDescription").trigger("focus");
-});
-
-$("#modalDueDate").datepicker({
-  minDate: 1
 });
 
 // save button in modal was clicked
@@ -162,11 +173,11 @@ $("#task-form-modal .btn-save").click(function() {
 
 // task text was clicked
 $(".list-group").on("click", "p", function() {
+  // get current text of p element
   var text = $(this)
   .text()
   // putting items on new lines creates readability
   .trim();
-  console.log(text);
 
   // replace p element with a new text area
   var textInput = $("<textarea>").addClass("form-control").val(text);
@@ -177,7 +188,7 @@ $(".list-group").on("click", "p", function() {
 });
 
 // editable field was un-focused
-$(".list-group").on("change", "input[type='text]", function() {
+$(".list-group").on("blur", "textarea", function() {
   // get the text area's current value/text
   var text = $(this).val();  
 
@@ -228,7 +239,7 @@ $(".list-group").on("click", "span", function() {
     }
   });
 
-  // automatically focus on new element/bring up calendar?
+  // automatically bring up calendar?
   dateInput.trigger("focus");
 });
 
@@ -254,7 +265,6 @@ $(".list-group").on("change", "input[type='text']", function() {
     .text(date);
   // replace input with span element
   $(this).replaceWith(taskSpan);
-
   // Pass task's <li> element into auditTask() to check new due date
   auditTask($(taskSpan).closest(".list-group-item"));
 });
@@ -266,38 +276,16 @@ $("#remove-tasks").on("click", function() {
     tasks[key].length = 0;
     $("#list-" + key).empty();
   }
+  console.log(tasks);
   saveTasks();
 });
-
-var auditTask = function(taskEl) {
-  // get date from task element
-  var date = $(taskEl).find("span").text().trim();
-  //ensure it worked
-  console.log(date);
-  console.log(taskEl);
-
-  // convert to moment object at 5:00 pm
-  var time = moment(date, "L").set("hour", 17);
-
-  // remove any old clases from Element
-  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
-
-  // apply new class if task is near/over due date
-  if(moment().isAfter(time)) {
-    $(taskEl).addClass("list-group-item-danger");
-  }
-  else if (Math.abs(moment().diff(time, "days")) <= 2) {
-    $(taskEl).addClass("list-group-item-warning");
-  }
-};
-
-setInterval(function() {
-  $(".card .list-group-item").each(function(index, el) {
-    auditTask(el);
-  });
-}, 1800000);
 
 // load tasks for the first time
 loadTasks();
 
-
+// audit task due dates every 30 minutes
+setInterval(function() {
+  $(".card .list-group-item").each(function() {
+    auditTask($(this));
+  });
+}, 1800000);
