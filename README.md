@@ -1,4 +1,5 @@
 # Taskmaster-Pro
+A Kanban board to help you manager your tasks. 
 
 ## Description
 
