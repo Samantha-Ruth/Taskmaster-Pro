@@ -5,14 +5,15 @@ A Kanban board to help you manager your tasks.
 
 This project's goal was to   .  The user can 
 
-![Blank_Taskinator_Screen](https://user-images.githubusercontent.com/64170123/188967395-00b957d7-bc42-4ac8-a907-4b7b0fcb722d.jpg)
+![TaskMaster_with_tasks](https://user-images.githubusercontent.com/64170123/188967718-a19e417d-3e08-40ad-8340-0f2a4a5bb856.jpg)
 
-![Taskinator Screen](https://user-images.githubusercontent.com/64170123/188967416-7fc2f7ac-5b79-4f86-873c-a135fc6cf898.jpg)
-
+![Adding_Task](https://user-images.githubusercontent.com/64170123/188967713-2be4e8a2-b670-460f-9240-83bc500747a8.jpg)
 
 This project helped introduce me to ....  I hope to further my understanding of these items in the future. 
 
 The link to the deployed project is here: https://samantha-ruth.github.io/Taskmaster-Pro
 
 The url of the Git repository is here: https://github.com/Samantha-Ruth/Taskmaster-Pro
+
+
 
